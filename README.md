@@ -47,12 +47,12 @@
 ---
 
 ## 🔨 功能
-- [x] **纯 Go 实现、零磁盘缓存**：单进程按 `Host` 自动路由到各大公共仓库（`Docker Hub`、`GHCR`、`Quay`、`K8s`、`MCR`、`Elastic`、`NVCR` 等），服务端完成 token 鉴权并以流式转发，不落盘、不占用本地存储
+- [x] **零磁盘缓存**：单进程按 `Host` 自动路由到各大公共仓库（`Docker Hub`、`GHCR`、`Quay`、`K8s`、`MCR`、`Elastic`、`NVCR` 等），服务端完成 token 鉴权并以流式转发，不落盘、不占用本地存储
 - [x] **一键部署**：自动检查并安装 Docker / Compose 依赖，支持镜像版直拉（`docker-compose.yaml`）或源码构建版（`docker-compose-build.yaml`）两种方式
 - [x] **可选反代服务**：自动部署 Nginx 或 Caddy 反代，并渲染对应配置（HTTPS、Host 改写）
-- [x] **支持仓库账号认证**：可配置上游账号密码，由代理服务端换取 Bearer Token，从而拉取 `Docker Hub` 私有镜像并缓解官方限流 [配置参考](https://github.com/dqzboy/Docker-Proxy/blob/main/Issue/issue.md#12%E5%85%B3%E4%BA%8Edocker-hub%E5%85%8D%E8%B4%B9%E6%8B%89%E5%8F%96%E6%94%BF%E7%AD%96%E5%86%8D%E6%AC%A1%E5%8F%98%E6%9B%B4%E5%90%8E%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88)
-- [x] **HubCMD-UI 管理面板**：网页端直接增删改代理、设置服务器参数并热重载，无需手改 `config.yaml`；含镜像搜索、文档教程、容器管理、监控告警等
-- [x] **跨平台镜像**：基于 `docker buildx` 构建并推送 `linux/amd64`、`linux/arm64` 等全架构镜像到 Docker Hub（`dqzboy/registry`、`dqzboy/hubcmd-ui`）
+- [x] **支持仓库账号认证**：可配置上游账号密码，由代理服务端换取 Bearer Token，从而拉取 `Docker Hub` 私有镜像并缓解官方限流
+- [x] **HubCMD-UI 管理面板**：网页端直接增删改代理、设置服务器参数并热重载；含镜像搜索、文档教程、容器管理、监控告警等
+- [x] **跨平台镜像**：支持主流 `linux/amd64`、`linux/arm64` 等系统架构的部署
 - [x] **日常运维管理**：提供服务启动 / 停止 / 重启 / 日志 / 更新 / 卸载等全生命周期管理
 
 ## 📦 部署

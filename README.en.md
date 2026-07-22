@@ -47,12 +47,12 @@
 ---
 
 ## 🔨 Features
-- [x] **Pure Go implementation, zero disk cache**: A single process automatically routes by `Host` to major public registries (Docker Hub, GHCR, Quay, K8s, MCR, Elastic, NVCR, etc.), performs server-side token authentication and streams the response without writing to disk or consuming local storage.
+- [x] **Zero disk cache**: A single process automatically routes by `Host` to major public registries (Docker Hub, GHCR, Quay, K8s, MCR, Elastic, NVCR, etc.), performs server-side token authentication and streams the response without writing to disk or consuming local storage.
 - [x] **One-click deployment**: Automatically checks and installs Docker / Compose dependencies, supporting both the image-pull mode (`docker-compose.yaml`) and the source-build mode (`docker-compose-build.yaml`).
 - [x] **Optional reverse proxy**: Automatically deploys Nginx or Caddy as a reverse proxy and renders the corresponding configuration (HTTPS, Host rewriting).
-- [x] **Upstream account authentication**: You can configure an upstream username/password; the proxy server exchanges them for a Bearer Token, enabling pulls of private Docker Hub images and mitigating official rate limits. [Configuration reference](https://github.com/dqzboy/Docker-Proxy/blob/main/Issue/issue.md#12%E5%85%B3%E4%BA%8Edocker-hub%E5%85%8D%E8%B4%B9%E6%8B%89%E5%8F%96%E6%94%BF%E7%AD%96%E5%86%8D%E6%AC%A1%E5%8F%98%E6%9B%B4%E5%90%8E%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88)
-- [x] **HubCMD-UI management panel**: Manage proxies, configure server parameters and hot-reload directly from the web UI without manually editing `config.yaml`; includes image search, documentation tutorials, container management, monitoring & alerting, etc.
-- [x] **Cross-platform images**: Build and push multi-arch images (linux/amd64, linux/arm64, etc.) to Docker Hub via `docker buildx` (`dqzboy/registry`, `dqzboy/hubcmd-ui`).
+- [x] **Upstream account authentication**: You can configure an upstream username/password; the proxy server exchanges them for a Bearer Token, enabling pulls of private Docker Hub images and mitigating official rate limits.
+- [x] **HubCMD-UI management panel**: On the web interface, you can directly add, delete, and modify proxies, configure server parameters, and perform hot reloading; it also includes image search, documentation tutorials, container management, monitoring, and alerting.
+- [x] **Cross-platform images**: Supports deployment on mainstream system architectures such as `linux/amd64` and `linux/arm64`.
 - [x] **Daily operations management**: Provides full lifecycle management including service start / stop / restart / logs / update / uninstall.
 
 ## 📦 Deployment
