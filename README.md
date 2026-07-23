@@ -44,7 +44,7 @@
 
 ## 🔨 功能
 - [x] **零磁盘缓存**：单进程按 `Host` 自动路由到各大公共仓库（`Docker Hub`、`GHCR`、`Quay`、`K8s`、`MCR`、`Elastic`、`NVCR` 等），服务端完成 token 鉴权并以流式转发，不落盘、不占用本地存储
-- [x] **一键部署**：自动检查并安装 Docker / Compose 依赖，支持镜像版直拉（`docker-compose.yaml`）或源码构建版（`docker-compose-build.yaml`）两种方式
+- [x] **一键部署**：交互式菜单一键完成「安装依赖 → 启动 Docker 镜像加速 →（可选）渲染 Nginx/Caddy 反代」
 - [x] **可选反代服务**：自动部署 Nginx 或 Caddy 反代，并渲染对应配置（HTTPS、Host 改写）
 - [x] **支持仓库账号认证**：可配置上游账号密码，由代理服务端换取 Bearer Token，从而拉取 `Docker Hub` 私有镜像并缓解官方限流
 - [x] **HubCMD-UI 管理面板**：网页端直接增删改代理、设置服务器参数并热重载；含镜像搜索、文档教程、容器管理、监控告警等
@@ -85,7 +85,7 @@ bash -c "$(curl -fsSL https://ghp.ci/https://raw.githubusercontent.com/dqzboy/Do
 
 > 脚本会自动：检查并安装 Docker / Docker Compose；生成随机 `GO_PROXY_ADMIN_TOKEN` 写入 `.env`；可选部署 Nginx / Caddy 反代。
 
-部署完成后访问 `http://<服务器IP>:30080/admin` 即可在网页管理代理与服务器参数（首次使用需自行注册管理员账号，无内置默认账号）
+部署完成后访问 `http://<服务器IP>:30080/admin` 即可在网页管理代理与服务器参数
 
 ### 配置持久化与升级（重要）
 配置文件挂载在宿主机 `./config/go-proxy/` 目录（容器内 `/app/config.d/config.yaml`）
