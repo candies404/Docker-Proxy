@@ -115,11 +115,11 @@ The config file is mounted on the host at `./config/go-proxy/` (inside the conta
     </tr>
     <tr>
       <td width="50%" align="center"><b>Container Management</b></td>
-      <td width="50%" align="center"><b>Monitoring & Alerting</b></td>
+      <td width="50%" align="center"><b>Traffic monitoring</b></td>
     </tr>
     <tr>
         <td width="50%" align="center"><img src="https://cdn.jsdelivr.net/gh/dqzboy/Images/picture/hubcmdui-docker-manager.png?raw=true"></td>
-        <td width="50%" align="center"><img src="https://cdn.jsdelivr.net/gh/dqzboy/Images/picture/hubcmdui-alter.png?raw=true"></td>
+        <td width="50%" align="center"><img src="https://cdn.jsdelivr.net/gh/dqzboy/Images/picture/hubcmdui-Traffic.png?raw=true"></td>
     </tr>
 </table>
 

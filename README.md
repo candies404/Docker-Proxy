@@ -115,11 +115,11 @@ bash -c "$(curl -fsSL https://ghp.ci/https://raw.githubusercontent.com/dqzboy/Do
     </tr>
     <tr>
       <td width="50%" align="center"><b>容器管理</b></td>
-      <td width="50%" align="center"><b>监控告警</b></td>
+      <td width="50%" align="center"><b>流量监控</b></td>
     </tr>
     <tr>
         <td width="50%" align="center"><img src="https://cdn.jsdelivr.net/gh/dqzboy/Images/picture/hubcmdui-docker-manager.png?raw=true"></td>
-        <td width="50%" align="center"><img src="https://cdn.jsdelivr.net/gh/dqzboy/Images/picture/hubcmdui-alter.png?raw=true"></td>
+        <td width="50%" align="center"><img src="https://cdn.jsdelivr.net/gh/dqzboy/Images/picture/hubcmdui-Traffic.png?raw=true"></td>
     </tr>
 </table>
 
