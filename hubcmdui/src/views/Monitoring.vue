@@ -68,7 +68,7 @@
           </div>
         </div>
 
-        <el-form label-width="110px" class="mon-form">
+        <el-form label-position="top" class="mon-form">
           <el-form-item v-if="form.notificationType === 'wechat'" label="Webhook">
             <el-input v-model="form.webhookUrl" placeholder="https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=...">
               <template #prefix><el-icon><Link /></el-icon></template>
@@ -93,7 +93,7 @@
         <template #header>
           <div class="sec-head"><el-icon><Timer /></el-icon><span>监控规则</span></div>
         </template>
-        <el-form label-width="110px" class="mon-form">
+        <el-form label-position="top" class="mon-form">
           <el-form-item label="检测间隔">
             <el-input-number v-model="form.monitorInterval" :min="10" :max="3600" :step="10" controls-position="right" />
             <span class="unit">秒</span>
@@ -269,11 +269,17 @@ onMounted(load)
 .pc-desc { font-size: 12px; color: var(--muted); margin-top: 2px; }
 .pc-check { position: absolute; top: 10px; right: 10px; color: var(--accent); font-size: 18px; }
 
-/* 表单 */
-.mon-form { margin-top: 4px; }
+/* 表单：与上方 provider-card 内容区左右对齐（卡片内边距 14px） */
+.mon-form { margin-top: 4px; padding: 0 14px; }
+.mon-form :deep(.el-form-item__label) {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--fg-2);
+  padding-bottom: 4px;
+}
 .field-hint { font-size: 12px; color: var(--muted); line-height: 1.5; margin-top: 4px; }
 .unit { margin-left: 8px; color: var(--muted); font-size: 13px; }
-.test-btn { width: 100%; margin-top: 6px; }
+.test-btn { width: calc(100% - 28px); margin: 6px 14px 0; }
 
 .stopped { margin-top: 0; }
 

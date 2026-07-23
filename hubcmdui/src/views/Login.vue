@@ -31,7 +31,6 @@
             placeholder="请输入密码"
             :prefix-icon="Lock"
             size="large"
-            @keyup.enter="onSubmit"
           />
         </el-form-item>
 
@@ -42,7 +41,6 @@
               placeholder="请输入右侧验证码（不区分大小写）"
               :prefix-icon="Key"
               size="large"
-              @keyup.enter="onSubmit"
             />
             <div
               class="captcha-box"
@@ -123,6 +121,7 @@ async function loadCaptcha() {
 }
 
 async function onSubmit() {
+  if (loading.value) return
   if (!form.value.username || !form.value.password || !form.value.captcha) {
     ElMessage.warning('请填写完整信息')
     return

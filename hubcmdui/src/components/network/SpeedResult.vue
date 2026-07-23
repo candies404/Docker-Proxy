@@ -33,6 +33,15 @@
 
     <el-progress :percentage="Math.min(100, data.speedMbps)" :color="speedColor" :stroke-width="16" :show-text="false" class="speed-bar" />
 
+    <el-alert
+      v-if="data.fallback && data.note"
+      type="warning"
+      :title="data.note"
+      :closable="false"
+      show-icon
+      class="fallback-alert"
+    />
+
     <div class="speed-hint">
       <el-icon><InfoFilled /></el-icon>
       <span>测速结果受服务器带宽、目标节点负载与当前网络环境影响，仅供参考。</span>
@@ -72,6 +81,7 @@ function formatBytes(bps) {
 .metric-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 16px; }
 .metric-value.mini { font-size: 13px; word-break: break-all; line-height: 1.4; }
 .speed-bar { margin-bottom: 12px; }
+.fallback-alert { margin-bottom: 12px; }
 .speed-hint { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
 .speed-hint .el-icon { color: var(--muted-2); }
 </style>

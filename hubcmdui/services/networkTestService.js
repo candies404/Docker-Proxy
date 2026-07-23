@@ -309,19 +309,44 @@ async function runTcpTest(target, port = 80) {
   });
 }
 
-// ---------- 下载测速 ----------
-async function runSpeedTest(url = 'https://speed.cloudflare.com/__down?bytes=10000000', durationMs = 8000) {
-  const targetUrl = String(url || '').trim();
+// 公共测速节点（作为 fallback 池）
+const SPEED_PRESETS = [
+  'https://speed.cloudflare.com/__down?bytes=10000000',
+  'https://cachefly.cachefly.net/10mb.test',
+  'https://speedtest.tele2.net/10MB.zip',
+  'https://speed.cloudflare.com/__down?bytes=25000000'
+];
+
+// 用单一 URL 执行一次测速
+function runSingleSpeedTest(targetUrl, durationMs = 8000) {
   const start = Date.now();
   let totalBytes = 0;
-  let aborted = false;
 
   return new Promise((resolve, reject) => {
-    const parsed = new URL(targetUrl);
-    const client = parsed.protocol === 'https:' ? https : http;
-    const req = client.get(targetUrl, { timeout: 15000 }, (res) => {
+    let parsed;
+    try {
+      parsed = new URL(targetUrl);
+    } catch (e) {
+      return reject(new Error('测速地址格式无效'));
+    }
+
+    const isHttps = parsed.protocol === 'https:';
+    const client = isHttps ? https : http;
+    const agent = isHttps
+      ? new https.Agent({ rejectUnauthorized: false, servername: parsed.hostname })
+      : new http.Agent();
+
+    const req = client.get(targetUrl, {
+      timeout: 15000,
+      agent,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': '*/*',
+        'Accept-Encoding': 'identity'
+      }
+    }, (res) => {
       if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
-        return runSpeedTest(res.headers.location, durationMs).then(resolve).catch(reject);
+        return runSingleSpeedTest(res.headers.location, durationMs).then(resolve).catch(reject);
       }
       if (res.statusCode !== 200) {
         return reject(new Error(`HTTP ${res.statusCode}`));
@@ -330,7 +355,6 @@ async function runSpeedTest(url = 'https://speed.cloudflare.com/__down?bytes=100
       res.on('data', (chunk) => {
         totalBytes += chunk.length;
         if (Date.now() - start >= durationMs) {
-          aborted = true;
           req.destroy();
         }
       });
@@ -358,6 +382,35 @@ async function runSpeedTest(url = 'https://speed.cloudflare.com/__down?bytes=100
       reject(new Error('测速请求超时'));
     });
   });
+}
+
+// ---------- 下载测速（带多节点回退） ----------
+async function runSpeedTest(url = SPEED_PRESETS[0], durationMs = 8000) {
+  const primaryUrl = String(url || '').trim();
+  const candidates = [primaryUrl, ...SPEED_PRESETS.filter(u => u !== primaryUrl)];
+  const errors = [];
+
+  for (const u of candidates) {
+    try {
+      const result = await runSingleSpeedTest(u, durationMs);
+      if (candidates.length > 1 && u !== primaryUrl) {
+        result.fallback = true;
+        result.note = `主节点测速失败，已自动切换至备用节点 ${result.target}`;
+      }
+      return result;
+    } catch (e) {
+      const msg = e.message || String(e);
+      errors.push(`${new URL(u).hostname}: ${msg}`);
+      // 仅连接类/ TLS 类错误继续回退；HTTP 4xx/5xx 也继续，因为可能是节点不可用
+      if (/invalid url|range error|type error/i.test(msg)) {
+        break;
+      }
+    }
+  }
+
+  const error = new Error('所有测速节点均不可用');
+  error.details = errors.join('；');
+  throw error;
 }
 
 async function runTest({ type, target, port, url, duration }) {
