@@ -42,10 +42,6 @@
 
 ---
 
-> **If you encounter problems or questions during deployment, click here [Issue Summary](Issue/issue.md) to check whether your case is covered! Try to resolve it yourself first.**
-
----
-
 ## 🔨 Features
 - [x] **Zero disk cache**: A single process automatically routes by `Host` to major public registries (Docker Hub, GHCR, Quay, K8s, MCR, Elastic, NVCR, etc.), performs server-side token authentication and streams the response without writing to disk or consuming local storage.
 - [x] **One-click deployment**: Automatically checks and installs Docker / Compose dependencies, supporting both the image-pull mode (`docker-compose.yaml`) and the source-build mode (`docker-compose-build.yaml`).

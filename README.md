@@ -42,10 +42,6 @@
 
 ---
 
-> **部署过程中出现的问题或者疑问，请点击这里 [问题总结](Issue/issue.md)，查看是否有你遇到的情况！尝试先自己解决。**
-
----
-
 ## 🔨 功能
 - [x] **零磁盘缓存**：单进程按 `Host` 自动路由到各大公共仓库（`Docker Hub`、`GHCR`、`Quay`、`K8s`、`MCR`、`Elastic`、`NVCR` 等），服务端完成 token 鉴权并以流式转发，不落盘、不占用本地存储
 - [x] **一键部署**：自动检查并安装 Docker / Compose 依赖，支持镜像版直拉（`docker-compose.yaml`）或源码构建版（`docker-compose-build.yaml`）两种方式
