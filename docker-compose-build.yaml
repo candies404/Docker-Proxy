@@ -1,14 +1,6 @@
 # ============================================================
 #  使用： docker compose -f docker-compose-build.yaml up -d
-#  适用：已克隆仓库、需要本地构建 go-proxy / hubcmdui 镜像的场景。
-#        仅需拉取现成镜像请改用 docker-compose.yaml
 # ============================================================
-#
-# 端口说明：
-#   - go-proxy  容器内部 :5000，对主机发布为 50000
-#              nginx / caddy 把各注册表子域反代到 localhost:50000）
-#   - go-proxy  :5001  管理 API 端口（仅 docker 内部可达，host 不映射，不对外暴露）
-#   - hubcmd-ui :30080 网页管理面板（访问 http://<服务器IP>:30080/admin 进行管理）
 
 services:
   go-proxy:
