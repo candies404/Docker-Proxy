@@ -16,10 +16,16 @@ api.interceptors.response.use(
 )
 
 // ============ 鉴权 ============
-export const getCaptcha = () => api.get('/captcha').then(r => r.data)
+// 取码时服务端会下发 captchaId，登录/重置时须原样回传，便于服务端校验。
+// 验证码已与 session 解耦，避免并发请求抢走 session cookie 导致校验失败。
+let _captchaId = null
+export const getCaptcha = () => api.get('/captcha').then(r => {
+  _captchaId = r.data && r.data.captchaId
+  return r.data
+})
 export const login = (payload) => {
   const { username, password, captcha } = payload || {}
-  return api.post('/login', { username, password, captcha }).then(r => r.data)
+  return api.post('/login', { username, password, captcha, captchaId: _captchaId }).then(r => r.data)
 }
 export const logout = () => api.post('/logout').then(r => r.data)
 export const checkSession = () => api.get('/check-session').then(r => r.data)
@@ -29,7 +35,7 @@ export const changeUsername = (newUsername, password) =>
   api.post('/change-username', { newUsername, password }).then(r => r.data)
 export const getUserInfo = () => api.get('/user-info').then(r => r.data)
 export const requestResetToken = (username, captcha) =>
-  api.post('/request-reset-token', { username, captcha }).then(r => r.data)
+  api.post('/request-reset-token', { username, captcha, captchaId: _captchaId }).then(r => r.data)
 export const resetPassword = (token, newPassword, confirmPassword) =>
   api.post('/reset-password', { token, newPassword, confirmPassword }).then(r => r.data)
 export const validateResetToken = (token) =>

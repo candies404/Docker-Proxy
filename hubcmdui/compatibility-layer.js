@@ -12,7 +12,7 @@ const networkTestService = require('./services/networkTestService');
 const systemService = require('./services/systemService');
 const trafficService = require('./services/trafficService');
 const configServiceDB = require('./services/configServiceDB');
-const { generateCaptchaCode, verifyCaptcha } = require('./lib/captcha');
+const { generateCaptchaCode, verifyCaptcha, storeCaptcha, consumeCaptcha } = require('./lib/captcha');
 
 module.exports = function(app) {
   logger.info('加载API兼容层...');
@@ -42,8 +42,8 @@ module.exports = function(app) {
   app.get('/api/captcha', (req, res) => {
     try {
       const captcha = generateCaptchaCode(4);
-      req.session.captcha = captcha; // 标准答案（大写）
-      res.json({ captcha });
+      const captchaId = storeCaptcha(captcha); // 与 session 解耦存储
+      res.json({ captcha, captchaId });
     } catch (error) {
       logger.error('生成验证码失败:', error);
       res.status(500).json({ error: '生成验证码失败' });
@@ -511,9 +511,9 @@ module.exports = function(app) {
   // 登录接口 (兼容层备份)
   app.post('/api/login', async (req, res) => {
     try {
-      const { username, password, captcha } = req.body;
+      const { username, password, captcha, captchaId } = req.body;
       
-      if (!verifyCaptcha(req.session.captcha, captcha)) {
+      if (!verifyCaptcha(consumeCaptcha(captchaId), captcha)) {
         logger.warn(`Captcha verification failed for user: ${username}`);
         return res.status(401).json({ error: '验证码错误' });
       }

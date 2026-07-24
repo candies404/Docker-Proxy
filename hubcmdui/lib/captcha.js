@@ -41,4 +41,56 @@ function verifyCaptcha(expected, input) {
     return a.length > 0 && a === b;
 }
 
-module.exports = { ALPHABET, generateCaptchaCode, verifyCaptcha };
+/**
+ * 服务端验证码存储（与 session 解耦）
+ * ----------------------------------------------------------------
+ * 旧实现把验证码明文存在 req.session.captcha 里，登录页加载时会并发
+ * 发起「取验证码」和「check-session」两个未登录请求，二者各自新建
+ * 一个 session 并下发 Set-Cookie。浏览器最终保留的 cookie 往往指向
+ * check-session 新建的那个空 session，导致登录请求带着的 cookie 对应的
+ * session 里根本没有 captcha —— 表现为「验证码正确却提示错误、刷新一次
+ * 就好」。这是 express-session 的经典竞态。
+ *
+ * 这里改存到独立的 Map，以服务端生成的 captchaId 为键；前端取码时拿到
+ * captchaId，登录/重置时回传 captchaId + captcha，校验完全不依赖 session
+ * cookie，竞态被彻底消除。
+ */
+const captchaStore = new Map();
+const CAPTCHA_TTL = 5 * 60 * 1000; // 验证码有效期 5 分钟
+
+/**
+ * 存入一个验证码，返回对应的 captchaId
+ * @param {string} code 标准答案（大写）
+ * @returns {string} captchaId
+ */
+function storeCaptcha(code, ttl = CAPTCHA_TTL) {
+    const id = crypto.randomBytes(16).toString('hex');
+    captchaStore.set(id, { code, expires: Date.now() + ttl });
+    return id;
+}
+
+/**
+ * 消费（一次性校验）一个验证码
+ * @param {string} id 取码时拿到的 captchaId
+ * @returns {string|null} 该 captchaId 对应的标准答案；不存在或已过期返回 null
+ */
+function consumeCaptcha(id) {
+    if (!id || typeof id !== 'string') return null;
+    const entry = captchaStore.get(id);
+    if (!entry) return null;
+    captchaStore.delete(id); // 一次性使用，防止重放
+    if (entry.expires < Date.now()) return null;
+    return entry.code;
+}
+
+// 惰性清理过期项，避免 Map 无限增长；不阻止进程退出
+function pruneCaptchaStore() {
+    const now = Date.now();
+    for (const [k, v] of captchaStore) {
+        if (v.expires < now) captchaStore.delete(k);
+    }
+}
+const _pruneTimer = setInterval(pruneCaptchaStore, 5 * 60 * 1000);
+if (_pruneTimer && typeof _pruneTimer.unref === 'function') _pruneTimer.unref();
+
+module.exports = { ALPHABET, generateCaptchaCode, verifyCaptcha, storeCaptcha, consumeCaptcha };

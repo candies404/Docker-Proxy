@@ -220,7 +220,13 @@ async function onSave() {
   finally { saving.value = false }
 }
 async function onTogglePublish(row) {
-  try { await togglePublish(row.id); ElMessage.success('已切换'); load() }
+  try {
+    await togglePublish(row.id)
+    // 用户点击按钮时 row.published 仍是旧值,!row.published 即为切换后的新状态
+    const newPublished = !row.published
+    ElMessage.success(`「${row.title}」已${newPublished ? '发布' : '下架'}`)
+    load()
+  }
   catch (e) { ElMessage.error(e.response?.data?.error || e.message) }
 }
 async function onDelete(row) {

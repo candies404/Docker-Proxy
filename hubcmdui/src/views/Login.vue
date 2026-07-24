@@ -38,7 +38,7 @@
           <div class="captcha-row">
             <el-input
               v-model="form.captcha"
-              placeholder="请输入右侧验证码（不区分大小写）"
+              placeholder="请输入右侧验证码"
               :prefix-icon="Key"
               size="large"
             />
@@ -200,7 +200,7 @@ onMounted(async () => {
   // 已登录用户直接进后台，避免停留在登录页
   try {
     const res = await checkSession()
-    if (res && res.authenticated) {
+    if (res && res.success) {
       const target = props.redirect || route.query.redirect || '/admin'
       router.replace(target)
     }
@@ -279,12 +279,12 @@ onMounted(async () => {
   font-weight: 800;
   margin: 6px 0 0;
   letter-spacing: -0.02em;
-  color: #1d1d1f;
+  color: var(--fg);
 }
 .brand-sub {
   margin: 0;
   font-size: 13px;
-  color: #6e6e73;
+  color: var(--muted);
   letter-spacing: 0.2px;
 }
 
@@ -445,4 +445,28 @@ onMounted(async () => {
   font-size: 13px;
 }
 
+</style>
+
+<!-- 非 scoped：深色模式下让登录卡片背景/边框也走主题变量，
+     否则 .brand-title/.brand-sub 改成 var(--fg)/var(--muted) 后在浅色卡片上反而会看不清 -->
+<style>
+:root.dark .login-card {
+  background: rgba(30, 41, 59, 0.94) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55) !important;
+}
+:root.dark .login-wrap .field :deep(.el-input__wrapper) {
+  background: rgba(15, 23, 42, 0.7) !important;
+  box-shadow: 0 0 0 1px rgba(148, 163, 184, 0.45) inset !important;
+}
+:root.dark .login-wrap .field :deep(.el-input__wrapper.is-focus) {
+  background: rgba(15, 23, 42, 0.92) !important;
+  box-shadow: 0 0 0 1px var(--accent) inset, 0 0 0 4px rgba(34, 197, 94, 0.18) !important;
+}
+:root.dark .login-foot {
+  color: var(--muted-2);
+}
+:root.dark .login-foot i {
+  color: #4ade80;
+}
 </style>
