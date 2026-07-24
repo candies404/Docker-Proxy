@@ -30,13 +30,13 @@
     </template>
   </el-dropdown>
 
-  <!-- 形态 2：导航胶囊（Landing 等公开页用，与 .hd-pill 完全同款视觉语言） -->
+  <!-- 形态 2：导航胶囊（Landing 等公开页用，与 .hd-pill 完全同款视觉语言；默认纯图标，文字仅在下拉项显示） -->
   <el-dropdown v-else-if="variant === 'nav'" trigger="click" @command="onCommand">
     <span
       class="lang-toggle lang-toggle--nav"
-      :title="t('app.language')"
+      :title="currentLabel"
       role="button"
-      :aria-label="t('app.language')"
+      :aria-label="ariaLabel"
       tabindex="0"
     >
       <svg class="lang-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -44,7 +44,6 @@
         <path d="M3 12h18" />
         <path d="M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18" />
       </svg>
-      <span class="lang-text">{{ currentLabel }}</span>
       <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="m6 9 6 6 6-6" />
       </svg>
@@ -164,12 +163,12 @@ function onCommand(code) {
 
 /* ===== nav：导航胶囊（公开页用，与 .hd-pill 完全同款视觉语言） ===== */
 .lang-toggle--nav {
-  /* 关键参数与 .hd-pill 完全一致：高度 36 / 圆角 999 / padding 0 14 / gap 6 / 字号 13.5 / 字重 600 */
+  /* 关键参数与 .hd-pill 完全一致：高度 36 / 圆角 999 / padding 0 12 / gap 6 / 字号 13.5 / 字重 600 */
   display: inline-flex;
   align-items: center;
   gap: 6px;
   height: 36px;
-  padding: 0 14px;
+  padding: 0 12px;
   border-radius: 999px;
   border: 1px solid transparent;
   background: transparent;

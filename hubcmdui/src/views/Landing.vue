@@ -1,6 +1,52 @@
 <template>
   <div class="landing">
-    <div class="lang-float"><LangSwitch variant="nav" /></div>
+    <div class="topbar-float">
+      <LangSwitch variant="nav" />
+      <div class="theme-toggle-wrap">
+        <button
+          class="hd-pill theme-btn"
+          type="button"
+          :aria-label="themeLabel"
+          :title="themeLabel"
+          @click="themeOpen = !themeOpen"
+        >
+          <span class="theme-ic">
+            <svg v-if="mode === 'light'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="4" />
+              <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+            </svg>
+            <svg v-else-if="mode === 'dark'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+            </svg>
+            <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+              <path d="M8 21h8M12 17v4" />
+            </svg>
+          </span>
+          <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+        </button>
+        <div v-if="themeOpen" class="theme-menu" @mousedown.prevent>
+          <button class="theme-item" :class="{ active: mode === 'light' }" type="button" @click="pickTheme('light')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" /></svg>
+            <span>{{ t('layout.themeLight') }}</span>
+            <svg v-if="mode === 'light'" class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5" /></svg>
+          </button>
+          <button class="theme-item" :class="{ active: mode === 'dark' }" type="button" @click="pickTheme('dark')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" /></svg>
+            <span>{{ t('layout.themeDark') }}</span>
+            <svg v-if="mode === 'dark'" class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5" /></svg>
+          </button>
+          <button class="theme-item" :class="{ active: mode === 'auto' }" type="button" @click="pickTheme('auto')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2" ry="2" /><path d="M8 21h8M12 17v4" /></svg>
+            <span>{{ t('layout.themeAuto') }}</span>
+            <svg v-if="mode === 'auto'" class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5" /></svg>
+          </button>
+        </div>
+      </div>
+      <div v-if="themeOpen" class="theme-backdrop" @click="themeOpen = false"></div>
+    </div>
     <!-- ============== 顶部导航（Glassmorphism 胶囊菜单） ============== -->
     <header class="hd">
       <div class="hd-inner">
@@ -527,6 +573,7 @@ import {
 } from '../services'
 import { getMenuIconSvg as getMenuIconSvgFromLib } from '../lib/menuIcons'
 import LangSwitch from '../components/LangSwitch.vue'
+import { useTheme } from '../composables/useTheme'
 
 marked.setOptions({
   breaks: true,
@@ -535,6 +582,20 @@ marked.setOptions({
 
 const router = useRouter()
 const { t } = useI18n()
+
+// ===== 公开页主题切换（复用全局单例 useTheme，与后台共享 mode 状态 + localStorage） =====
+const { mode, setMode } = useTheme()
+const themeOpen = ref(false)
+const themeLabel = computed(() => {
+  if (mode.value === 'light') return t('layout.themeLight')
+  if (mode.value === 'dark') return t('layout.themeDark')
+  return t('layout.themeAuto')
+})
+function pickTheme(m) {
+  setMode(m)
+  themeOpen.value = false
+}
+
 const year = new Date().getFullYear()
 const defaultLogo = 'https://cdn.jsdelivr.net/gh/dqzboy/Blog-Image/BlogCourse/docker-proxy.png'
 const logoUrl = ref(defaultLogo)
@@ -1355,10 +1416,90 @@ onUnmounted(() => {
 }
 
 /* ============== 语言切换器（固定右上角，整页可见） ============== */
-.lang-float {
+.topbar-float {
   position: fixed;
   top: 16px;
   right: 16px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ===== 公开页主题切换（与 .hd-pill 同款视觉） ===== */
+.theme-toggle-wrap {
+  position: relative;
+  z-index: 1002; /* 高于下方透明遮罩，保证按钮与菜单始终可点击 */
+}
+.hd-pill.theme-btn {
+  gap: 6px;
+  cursor: pointer;
+  padding: 0 12px;
+}
+.theme-ic {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.theme-ic svg { width: 100%; height: 100%; display: block; }
+.theme-btn .caret {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+  opacity: 0.85;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.theme-btn .caret svg { width: 100%; height: 100%; display: block; }
+
+.theme-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 168px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 10px 34px rgba(15, 23, 42, 0.14);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  z-index: 1001;
+}
+.theme-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 12px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  color: var(--fg-2);
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.theme-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+.theme-item:hover { background: var(--bg-hover); }
+.theme-item.active {
+  color: var(--accent);
+  font-weight: 600;
+  background: var(--accent-soft, rgba(61, 124, 244, 0.08));
+}
+.theme-item .check { margin-left: auto; width: 16px; height: 16px; }
+
+.theme-backdrop {
+  position: fixed;
+  inset: 0;
   z-index: 1000;
 }
 
@@ -2649,4 +2790,468 @@ onUnmounted(() => {
   .docs-content { padding: 22px 20px 28px; }
   .docs-h1 { font-size: 22px; }
 }
+
+/* ========================================================================
+ * 深色模式覆盖（非 scoped，依靠 :root.dark 触发，与 useTheme 联动）
+ * 选择器前缀 :root.dark .landing 提升特异性，胜过上面 scoped 的
+ * .landing .xxx[data-v-xxx]，因为非 scoped 在编译产物里靠后、且加上 :root.dark 多一份特异性
+ * ======================================================================== */
+:root.dark .landing {
+  background: #0f172a;
+  color: #e2e8f0;
+}
+
+/* === 顶部 header（Glassmorphism） === */
+:root.dark .landing .hd {
+  background: rgba(15, 23, 42, 0.72);
+  border-bottom-color: rgba(51, 65, 85, 0.6);
+}
+:root.dark .landing .hd-pill {
+  --pill-fg: #cbd5e1;
+  background: rgba(30, 41, 59, 0.6);
+  border-color: rgba(51, 65, 85, 0.6);
+}
+:root.dark .landing .hd-pill:hover {
+  color: #e2e8f0;
+  background: rgba(30, 41, 59, 0.9);
+  border-color: #60a5fa;
+}
+:root.dark .landing .hd-pill--default { color: #cbd5e1; background: rgba(30, 41, 59, 0.6); border-color: rgba(51, 65, 85, 0.6); }
+:root.dark .landing .hd-pill--default:hover { color: #f1f5f9; background: rgba(30, 41, 59, 0.9); border-color: #60a5fa; }
+:root.dark .landing .hd-logo { color: #f1f5f9; }
+:root.dark .landing .hd-logo:hover { background: rgba(96, 165, 250, 0.12); }
+:root.dark .landing .hd-pill--active {
+  color: #f1f5f9;
+  background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+  border-color: transparent;
+}
+
+/* === Tab 栏 === */
+:root.dark .landing .tab-container {
+  background: #1e293b;
+  border: 1px solid #334155;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2), 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+:root.dark .landing .tab { color: #94a3b8; }
+:root.dark .landing .tab:hover { color: #60a5fa; background: rgba(96, 165, 250, 0.08); }
+:root.dark .landing .tab.active { color: #60a5fa; background: rgba(96, 165, 250, 0.12); }
+
+/* === Hero 标题与副标题 === */
+:root.dark .landing .hero-title { color: #f1f5f9; }
+:root.dark .landing .hero-sub { color: #94a3b8; }
+
+/* === 内容卡片 === */
+:root.dark .landing .content-card {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+:root.dark .landing .result-title { color: #f1f5f9; }
+
+/* === 镜像加速 tab：Hero 卡 === */
+:root.dark .landing .accel-hero,
+:root.dark .landing .search-hero {
+  background: linear-gradient(180deg, #1e3a5f 0%, #1e293b 100%);
+  border-color: #334155;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2), 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+:root.dark .landing .accel-hero__title,
+:root.dark .landing .search-hero__title { color: #f1f5f9; }
+:root.dark .landing .accel-hero__title .hero-ic,
+:root.dark .landing .search-hero__title .hero-ic { color: #60a5fa; }
+:root.dark .landing .accel-hero__sub,
+:root.dark .landing .search-hero__sub { color: #94a3b8; }
+
+/* === 分段控件（seg） === */
+:root.dark .landing .seg {
+  background: #172033;
+  border-color: #334155;
+}
+:root.dark .landing .seg-item { color: #94a3b8; }
+:root.dark .landing .seg-item:hover { color: #cbd5e1; background: rgba(96, 165, 250, 0.06); }
+:root.dark .landing .seg-item.active {
+  background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* === 输入框 / 按钮 === */
+:root.dark .landing .search-bar {
+  background: #1e293b;
+  border-color: #334155;
+}
+:root.dark .landing .search-bar:hover { border-color: #475569; }
+:root.dark .landing .search-bar:focus-within { border-color: #60a5fa; box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.18); }
+:root.dark .landing .search-bar__input { color: #f1f5f9; }
+:root.dark .landing .search-bar__input::placeholder { color: #64748b; }
+:root.dark .landing .search-bar__lead { color: #64748b; }
+:root.dark .landing .search-bar__cta {
+  background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(96, 165, 250, 0.32);
+}
+:root.dark .landing .search-bar__cta:hover {
+  background: linear-gradient(135deg, #60a5fa 0%, #93c5fd 100%);
+  box-shadow: 0 6px 18px rgba(96, 165, 250, 0.42);
+}
+
+/* === 镜像加速 tab：步骤卡 === */
+:root.dark .landing .step-card {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+}
+:root.dark .landing .step {
+  --step-bg: #172033;
+  --step-border: #334155;
+  background: var(--step-bg);
+  border-color: var(--step-border);
+  color: #e2e8f0;
+}
+:root.dark .landing .step .step-label { color: #cbd5e1; }
+:root.dark .landing .step .step-copy-btn {
+  background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+  color: #fff;
+}
+:root.dark .landing .step .step-copy-btn:hover { box-shadow: 0 4px 12px rgba(96, 165, 250, 0.42); }
+/* step 状态变体（成功/错误，浅色下用 #f5f7fa 灰底） */
+:root.dark .landing .step-success,
+:root.dark .landing .step-error {
+  --step-bg: #172033;
+  --step-border: #334155;
+  background: var(--step-bg);
+  border-color: var(--step-border);
+  color: #e2e8f0;
+}
+
+/* === 镜像加速 tab：Quick start 卡 === */
+:root.dark .landing .quick-card {
+  background: linear-gradient(180deg, #1e3a5f 0%, #1e293b 100%);
+  border-color: #334155;
+}
+:root.dark .landing .quick-card .quick-title { color: #f1f5f9; }
+:root.dark .landing .quick-card .quick-title strong { color: #60a5fa; }
+:root.dark .landing .quick-card .quick-title i { color: #fbbf24; }
+:root.dark .landing .quick-item {
+  background: #1e293b;
+  border-color: #475569;
+}
+:root.dark .landing .quick-item:hover { border-color: #60a5fa; box-shadow: 0 2px 8px rgba(96, 165, 250, 0.18); }
+:root.dark .landing .quick-item i { color: #60a5fa; }
+:root.dark .landing .quick-item .quick-item-title { color: #f1f5f9; }
+
+/* === 镜像加速 tab：特性卡（高速拉取/稳定可靠/简单易用） === */
+:root.dark .landing .feature-card {
+  background: linear-gradient(180deg, #1e3a5f 0%, #1e293b 100%);
+  border-color: #334155;
+}
+:root.dark .landing .feature-card:hover { border-color: #60a5fa; box-shadow: 0 4px 14px rgba(96, 165, 250, 0.18); }
+:root.dark .landing .feature-card h3 { color: #f1f5f9; }
+:root.dark .landing .feature-card p { color: #94a3b8; }
+
+/* === 镜像搜索 tab：tab 切换按钮 === */
+:root.dark .landing .registry-badge { background: #475569; }
+
+/* === 镜像搜索 tab：搜索输入行 === */
+:root.dark .landing .text-input {
+  background: #1e293b;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+:root.dark .landing .text-input:focus { border-color: #60a5fa; }
+:root.dark .landing .text-input::placeholder { color: #64748b; }
+:root.dark .landing .primary-btn {
+  background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(96, 165, 250, 0.28);
+}
+:root.dark .landing .primary-btn:hover {
+  background: linear-gradient(135deg, #60a5fa 0%, #93c5fd 100%);
+  box-shadow: 0 6px 14px rgba(96, 165, 250, 0.42);
+}
+
+/* === 搜索结果卡 === */
+:root.dark .landing .search-result-item {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2), 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+:root.dark .landing .search-result-item:hover { border-color: #475569; }
+:root.dark .landing .search-result-item .result-summary { color: #94a3b8; }
+:root.dark .landing .search-result-item .result-summary strong { color: #f1f5f9; }
+:root.dark .landing .result-icon-wrap {
+  background: linear-gradient(180deg, #3b82f6 0%, #60a5fa 100%);
+  color: #fff;
+}
+:root.dark .landing .result-card .result-title { color: #f1f5f9; }
+:root.dark .landing .result-card .result-title i { color: #60a5fa; }
+/* .result-description v-html 内子元素的深色适配已迁移到下方独立 <style> 块 */
+:root.dark .landing .pull-cmd {
+  background: #172033;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+:root.dark .landing .copy-small-btn { background: #3b82f6; color: #fff; }
+:root.dark .landing .copy-small-btn:hover { background: #60a5fa; }
+:root.dark .landing .action-btn.secondary {
+  background: #1e293b;
+  color: #60a5fa;
+  border-color: #60a5fa;
+}
+:root.dark .landing .action-btn.secondary:hover { background: rgba(96, 165, 250, 0.12); }
+
+/* === 镜像搜索 tab：分页按钮 === */
+:root.dark .landing .pager-btn {
+  background: #1e293b;
+  color: #60a5fa;
+  border-color: #334155;
+}
+:root.dark .landing .pager-btn:hover:not(:disabled) {
+  border-color: #60a5fa;
+  background: rgba(96, 165, 250, 0.12);
+}
+:root.dark .landing .pager-btn:disabled { color: #475569; border-color: #334155; }
+:root.dark .landing .pager-info { color: #94a3b8; }
+
+/* === 镜像详情 / 标签表 === */
+:root.dark .landing .image-detail-card {
+  background: linear-gradient(180deg, #1e3a5f 0%, #1e293b 100%);
+  border-color: #334155;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2), 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+:root.dark .landing .image-detail-card .image-description { color: #cbd5e1; }
+:root.dark .landing .image-tag {
+  background: rgba(96, 165, 250, 0.15);
+  border-color: rgba(96, 165, 250, 0.3);
+  color: #93c5fd;
+}
+:root.dark .landing .image-tag-link { color: #93c5fd; }
+:root.dark .landing .tag-table {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2), 0 6px 18px rgba(0, 0, 0, 0.3);
+}
+:root.dark .landing .tag-table thead th {
+  background: linear-gradient(180deg, #172033 0%, #1e293b 100%);
+  color: #cbd5e1;
+  border-bottom-color: #334155;
+}
+:root.dark .landing .tag-table tbody td { border-bottom-color: #334155; color: #e2e8f0; }
+:root.dark .landing .tag-table tbody tr:hover { background: rgba(96, 165, 250, 0.06); }
+:root.dark .landing .tag-name-cell { color: #f1f5f9; }
+:root.dark .landing .arch-chip {
+  background: rgba(96, 165, 250, 0.15);
+  color: #93c5fd;
+  border-color: rgba(96, 165, 250, 0.3);
+}
+:root.dark .landing .arch-toggle {
+  background: #172033;
+  color: #94a3b8;
+  border-color: #334155;
+}
+:root.dark .landing .arch-toggle:hover { background: rgba(96, 165, 250, 0.15); color: #cbd5e1; }
+:root.dark .landing .tag-use-btn {
+  background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(96, 165, 250, 0.42);
+}
+:root.dark .landing .tag-use-btn:hover {
+  filter: brightness(1.1);
+  box-shadow: 0 6px 16px rgba(96, 165, 250, 0.5);
+}
+:root.dark .landing .tag-search-container input {
+  background: #1e293b;
+  border-color: #60a5fa;
+  color: #f1f5f9;
+  box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.18);
+}
+:root.dark .landing .tag-search-container input::placeholder { color: #64748b; }
+:root.dark .landing .reset-search-btn { background: #334155; color: #94a3b8; }
+:root.dark .landing .reset-search-btn:hover { background: #475569; color: #f1f5f9; }
+:root.dark .landing .tag-search-stats { color: #94a3b8; }
+:root.dark .landing .tag-search-stats strong { color: #93c5fd; }
+
+/* === 使用教程 tab / docs 网格 ===
+   注意：深色覆盖已迁移到下方独立 <style> 块（v-html 子元素无 [data-v-xxx]，
+   必须在非 scoped 块里才能命中）。原 scoped 块里的 :root.dark 规则全部移除。 */
+
+/* === 错误提示卡 === */
+:root.dark .landing .error-card {
+  background: linear-gradient(180deg, rgba(239, 68, 68, 0.12) 0%, #1e293b 100%);
+  border-color: #7f1d1d;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2), 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+:root.dark .landing .error-icon-wrap { background: rgba(239, 68, 68, 0.2); }
+:root.dark .landing .error-icon-wrap i { color: #fca5a5; }
+:root.dark .landing .error-title { color: #fca5a5; }
+:root.dark .landing .error-msg { color: #fca5a5; }
+:root.dark .landing .retry-btn { background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%); color: #fff; }
+:root.dark .landing .retry-btn:hover {
+  background: linear-gradient(135deg, #60a5fa 0%, #93c5fd 100%);
+  box-shadow: 0 6px 14px rgba(96, 165, 250, 0.42);
+}
+
+/* === 空状态 / 提示文字 === */
+:root.dark .landing .empty { color: #94a3b8; }
+:root.dark .landing .empty i { color: #475569; }
+:root.dark .landing .empty-hint { color: #94a3b8; }
+:root.dark .landing .empty-hint i { color: #475569; }
+:root.dark .landing .no-tags-message { color: #94a3b8; }
+:root.dark .landing .loading-indicator { color: #94a3b8; }
+:root.dark .landing .search-hint { color: #94a3b8; }
+:root.dark .landing .search-hint .dot { color: #475569; }
+
+/* === 模态弹窗 === */
+:root.dark .landing .modal-card {
+  background: #1e293b;
+  border: 1px solid #334155;
+  color: #f1f5f9;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+:root.dark .landing .modal-link {
+  border: 1px solid #334155;
+  background: #172033;
+  color: #60a5fa;
+}
+:root.dark .landing .modal-link:hover { border-color: #60a5fa; }
+:root.dark .landing .modal-action-btn {
+  background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+  color: #fff;
+  box-shadow: 0 12px 30px rgba(96, 165, 250, 0.42);
+}
+:root.dark .landing .modal-backdrop { background: rgba(0, 0, 0, 0.6); }
+
+/* === 主题菜单（沿用变量） === */
+:root.dark .landing .theme-menu {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.5);
+}
+:root.dark .landing .theme-item { color: #cbd5e1; }
+:root.dark .landing .theme-item:hover { background: rgba(96, 165, 250, 0.1); }
+:root.dark .landing .theme-item.active { color: #60a5fa; background: rgba(96, 165, 250, 0.15); }
+:root.dark .landing .theme-btn {
+  color: #cbd5e1;
+  background: rgba(30, 41, 59, 0.6);
+  border-color: rgba(51, 65, 85, 0.6);
+}
+:root.dark .landing .theme-btn:hover {
+  color: #f1f5f9;
+  background: rgba(30, 41, 59, 0.9);
+  border-color: #60a5fa;
+}
+
+/* === lang 切换器（nav 变体在 Landing 已对齐 .hd-pill） === */
+:root.dark .landing .lang-toggle--nav { color: #cbd5e1; }
+:root.dark .landing .lang-toggle--nav:hover {
+  color: #f1f5f9;
+  background: rgba(30, 41, 59, 0.9);
+  border-color: #60a5fa;
+}
+
+/* === Element Plus 下拉菜单（深色适配，仅 Landing 范围，避免影响登录/后台） === */
+:root.dark .landing .el-popper .el-dropdown-menu {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.5);
+}
+:root.dark .landing .el-popper .el-dropdown-menu .el-dropdown-item { color: #cbd5e1; }
+:root.dark .landing .el-popper .el-dropdown-menu .el-dropdown-item:hover {
+  background: rgba(96, 165, 250, 0.1);
+  color: #93c5fd;
+}
+:root.dark .landing .el-popper .el-dropdown-menu .el-dropdown-item.is-active {
+  color: #60a5fa;
+  background: rgba(96, 165, 250, 0.15);
+  font-weight: 600;
+}
+</style>
+
+<!--
+  ============================================================================
+  深色模式覆盖（独立非 scoped 块）
+  ============================================================================
+  关键：必须独立成块、不加 scoped，否则 Vue 会给所有选择器末尾加 [data-v-xxx]，
+  导致 v-html 渲染的内容（table th、h2、p、ul li、strong 等子元素自身没有该属性）
+  全部不命中。独立非 scoped 块不会加属性选择器，v-html 子元素正常匹配。
+  触发条件：与 useTheme 联动，<html class="dark"> 时命中。
+  ============================================================================
+-->
+<style>
+/* === 使用教程 tab / docs 网格 === */
+/* 侧边栏：注意 .docs-item 在 .docs-aside 里（不是 .docs-content），上一版写错 class 名了 */
+:root.dark .landing .docs-aside {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2), 0 6px 18px rgba(0, 0, 0, 0.3);
+  scrollbar-color: #475569 transparent;
+}
+:root.dark .landing .docs-aside::-webkit-scrollbar-thumb { background: #475569; }
+:root.dark .landing .docs-list-title { color: #64748b; }
+:root.dark .landing .docs-item { color: #cbd5e1; }
+:root.dark .landing .docs-item:hover {
+  background: rgba(96, 165, 250, 0.08);
+  color: #93c5fd;
+}
+:root.dark .landing .docs-item.active {
+  background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+  color: #fff;
+  box-shadow: 0 6px 16px rgba(96, 165, 250, 0.3);
+}
+:root.dark .landing .docs-content {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2), 0 6px 18px rgba(0, 0, 0, 0.3);
+}
+:root.dark .landing .docs-eyebrow {
+  background: rgba(96, 165, 250, 0.12);
+  border-color: rgba(96, 165, 250, 0.3);
+  color: #93c5fd;
+}
+:root.dark .landing .docs-h1 { color: #f1f5f9; border-bottom-color: #334155; }
+
+/* 文档正文：v-html 渲染的元素无 [data-v-xxx]，必须用非 scoped 块才能命中 */
+:root.dark .landing .docs-body { color: #cbd5e1; }
+:root.dark .landing .docs-body h1 { color: #f1f5f9; }
+:root.dark .landing .docs-body h2 { color: #60a5fa; border-left-color: #60a5fa; }
+:root.dark .landing .docs-body h3 { color: #f1f5f9; }
+:root.dark .landing .docs-body p { color: #cbd5e1; }
+:root.dark .landing .docs-body a { color: #60a5fa; }
+:root.dark .landing .docs-body strong { color: #f1f5f9; }
+:root.dark .landing .docs-body ul li,
+:root.dark .landing .docs-body ol li { color: #cbd5e1; }
+:root.dark .landing .docs-body code {
+  background: #172033;
+  color: #fca5a5;
+  border-color: #334155;
+}
+:root.dark .landing .docs-body pre {
+  background: #020617;
+  color: #e2e8f0;
+  border-color: #334155;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+:root.dark .landing .docs-body blockquote {
+  border-left-color: #60a5fa;
+  background: rgba(96, 165, 250, 0.08);
+  color: #cbd5e1;
+}
+:root.dark .landing .docs-body table { border-color: #334155; }
+:root.dark .landing .docs-body table th,
+:root.dark .landing .docs-body table td { border-color: #334155; }
+:root.dark .landing .docs-body table th {
+  background: rgba(96, 165, 250, 0.15);
+  color: #f1f5f9;
+}
+:root.dark .landing .docs-body table tbody tr:nth-child(even) { background: rgba(148, 163, 184, 0.04); }
+:root.dark .landing .docs-body table tbody tr:hover { background: rgba(96, 165, 250, 0.08); }
+:root.dark .landing .docs-body hr { border-color: #334155; }
+:root.dark .landing .docs-body img { box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4); }
+
+/* === 搜索结果描述（v-html 渲染） === */
+:root.dark .landing .result-description a { color: #60a5fa; border-bottom-color: rgba(96, 165, 250, 0.45); }
+:root.dark .landing .result-description a:hover { color: #93c5fd; }
+:root.dark .landing .result-description code { background: #172033; color: #fca5a5; border-color: #334155; }
+:root.dark .landing .result-description strong { color: #f1f5f9; }
+:root.dark .landing .result-description .desc-empty { color: #94a3b8; }
 </style>
